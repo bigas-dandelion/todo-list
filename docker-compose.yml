@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: my_pass
+      PGDATA: /data/postgres
+    volumes:
+      - ./postgres-data:/data/postgres
+    ports:
+      - "5434:5432"
+    networks:
+      - attrest_network
+
+  db-service:
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+    networks:
+      - attrest_network
+
+  api-service:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db-service
+    networks:
+      - attrest_network
+
+networks:
+  attrest_network:
+    driver: bridge
